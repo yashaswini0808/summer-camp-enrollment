@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summer Camp Sports Enrollment 2026</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <div class="container nav-container">
+            <div class="logo-brand" onclick="switchTab('catalog')">
+                <span class="brand-icon">🏕️</span>
+                <div class="brand-text">
+                    <span class="brand-name">SunBurst Camp</span>
+                    <span class="brand-sub">Sports Academy 2026</span>
+                </div>
+            </div>
+            
+            <nav class="nav-links">
+                <button class="nav-btn active" id="btn-tab-catalog" onclick="switchTab('catalog')">
+                    <i class="fa-solid fa-trophy"></i> Sports Catalog
+                </button>
+                <button class="nav-btn" id="btn-tab-my-enrollments" onclick="switchTab('my-enrollments')">
+                    <i class="fa-solid fa-receipt"></i> My Enrollments
+                </button>
+                <button class="nav-btn" id="btn-tab-admin" onclick="switchTab('admin')">
+                    <i class="fa-solid fa-chart-pie"></i> Admin Portal
+                </button>
+            </nav>
+
+            <div class="nav-cta">
+                <button class="btn btn-outline" onclick="switchTab('my-enrollments')">
+                    <i class="fa-solid fa-magnifying-glass"></i> Lookup Enrollment
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- MAIN CONTENT AREAS -->
+    <main class="main-body">
+
+        <!-- ================= TAB 1: SPORTS CATALOG ================= -->
+        <section id="tab-catalog" class="tab-content active">
+            <!-- Hero Banner -->
+            <div class="hero-banner">
+                <div class="container hero-content">
+                    <div class="hero-text">
+                        <span class="hero-badge">☀️ Summer Camp Registration Open</span>
+                        <h1>Unleash Your Athletic Potential This Summer!</h1>
+                        <p>Enroll in world-class coaching across Soccer, Swimming, Basketball, Tennis, Martial Arts & Archery. Safe, fun, and empowering for ages 5–18.</p>
+                        <div class="hero-stats">
+                            <div class="stat-pill"><i class="fa-solid fa-star"></i> 4.9/5 Rating</div>
+                            <div class="stat-pill"><i class="fa-solid fa-users"></i> 500+ Active Campers</div>
+                            <div class="stat-pill"><i class="fa-solid fa-certificate"></i> Certified Coaches</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Catalog Search & Filter Bar -->
+            <div class="container catalog-section">
+                <div class="filter-card">
+                    <div class="filter-grid">
+                        <div class="filter-group search-group">
+                            <label><i class="fa-solid fa-search"></i> Search Activity</label>
+                            <input type="text" id="search-input" placeholder="Search by sport title, coach, or keyword..." oninput="handleFilterChange()">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label><i class="fa-solid fa-layer-group"></i> Category</label>
+                            <select id="category-filter" onchange="handleFilterChange()">
+                                <option value="All">All Categories</option>
+                                <option value="Team Sports">Team Sports</option>
+                                <option value="Water Sports">Water Sports</option>
+                                <option value="Racket Sports">Racket Sports</option>
+                                <option value="Combat & Fitness">Combat & Fitness</option>
+                                <option value="Outdoor & Track">Outdoor & Track</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label><i class="fa-solid fa-child"></i> Participant Age</label>
+                            <input type="number" id="age-filter" placeholder="e.g. 9" min="3" max="25" oninput="handleFilterChange()">
+                        </div>
+
+                        <div class="filter-group reset-group">
+                            <button class="btn btn-secondary btn-full" onclick="resetFilters()">
+                                <i class="fa-solid fa-rotate-left"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Filter Tags & Count -->
+                <div class="catalog-header-bar">
+                    <h2>Available Sports Programs (<span id="sports-count">0</span>)</h2>
+                    <div class="view-options">
+                        <span class="spots-indicator"><i class="fa-solid fa-bolt"></i> Real-time Capacity Live</span>
+                    </div>
+                </div>
+
+                <!-- Sports Grid -->
+                <div id="sports-grid" class="sports-grid">
+                    <!-- Loaded dynamically via JS -->
+                    <div class="loading-state">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Loading Summer Camp Sports...
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: MY ENROLLMENTS / LOOKUP ================= -->
+        <section id="tab-my-enrollments" class="tab-content">
+            <div class="container page-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-receipt"></i> Customer Enrollment Portal</h2>
+                    <p>Lookup your registered summer camp sports, download digital enrollment passes, or request cancellation.</p>
+                </div>
+
+                <div class="lookup-card">
+                    <h3>Find Enrollment Records</h3>
+                    <div class="lookup-form">
+                        <div class="form-group">
+                            <label>Parent Email or Phone</label>
+                            <input type="text" id="lookup-query" placeholder="e.g. sarah.taylor@example.com or +1-555-0192">
+                        </div>
+                        <div class="form-group">
+                            <label>OR Enrollment Code</label>
+                            <input type="text" id="lookup-code" placeholder="e.g. CAMP-2026-X89A2">
+                        </div>
+                        <button class="btn btn-primary" onclick="searchEnrollments()">
+                            <i class="fa-solid fa-magnifying-glass"></i> Search Records
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lookup Results -->
+                <div id="enrollments-results" class="results-container">
+                    <div class="empty-state">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <p>Enter your parent email, phone number, or unique enrollment code above to display your active camp passes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: ADMIN DASHBOARD ================= -->
+        <section id="tab-admin" class="tab-content">
+            <div class="container page-section">
+                <div class="admin-header">
+                    <div>
+                        <h2><i class="fa-solid fa-chart-pie"></i> Summer Camp Admin Dashboard</h2>
+                        <p>Manage sports programs, track capacity, review registrations, and monitor camp revenue.</p>
+                    </div>
+                    <button class="btn btn-success" onclick="openAddSportModal()">
+                        <i class="fa-solid fa-plus"></i> Add New Sport Activity
+                    </button>
+                </div>
+
+                <!-- Stats Metric Cards -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon blue"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Active Sports Programs</span>
+                            <h3 id="stat-active-sports">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon green"><i class="fa-solid fa-user-check"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total Confirmed Campers</span>
+                            <h3 id="stat-total-enrollments">0</h3>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon purple"><i class="fa-solid fa-dollar-sign"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total Camp Revenue</span>
+                            <h3 id="stat-total-revenue">$0.00</h3>
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="metric-icon orange"><i class="fa-solid fa-chair"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Open Spots Remaining</span>
+                            <h3 id="stat-spots-available">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Management Tables -->
+                <div class="admin-tabs">
+                    <button class="admin-tab-btn active" id="admin-subtab-sports" onclick="switchAdminSubtab('sports')">
+                        <i class="fa-solid fa-list-check"></i> Manage Sports Programs
+                    </button>
+                    <button class="admin-tab-btn" id="admin-subtab-registrations" onclick="switchAdminSubtab('registrations')">
+                        <i class="fa-solid fa-users-rectangle"></i> All Registrations
+                    </button>
+                </div>
+
+                <!-- Admin Sports List Subtab -->
+                <div id="admin-view-sports" class="admin-view active">
+                    <div class="table-card">
+                        <div class="table-header">
+                            <h3>Summer Camp Sports Directory</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Icon & Title</th>
+                                        <th>Category</th>
+                                        <th>Age Group</th>
+                                        <th>Schedule</th>
+                                        <th>Fee</th>
+                                        <th>Capacity</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-sports-tbody">
+                                    <!-- Loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Registrations Subtab -->
+                <div id="admin-view-registrations" class="admin-view">
+                    <div class="table-card">
+                        <div class="table-header flex-between">
+                            <h3>All Participant Enrollments</h3>
+                            <div class="table-actions">
+                                <select id="admin-registration-status-filter" onchange="loadAdminRegistrations()">
+                                    <option value="ALL">All Statuses</option>
+                                    <option value="CONFIRMED">Confirmed Only</option>
+                                    <option value="CANCELLED">Cancelled Only</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Participant</th>
+                                        <th>Age</th>
+                                        <th>Sport Activity</th>
+                                        <th>Parent Contact</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-registrations-tbody">
+                                    <!-- Loaded via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <p>&copy; 2026 SunBurst Summer Camp Sports Academy. Built with Python FastAPI, SQLAlchemy & Modern Web Stack.</p>
+            <div class="footer-links">
+                <a href="/docs" target="_blank"><i class="fa-solid fa-code"></i> OpenAPI Docs (/docs)</a>
+                <a href="/health" target="_blank"><i class="fa-solid fa-heart-pulse"></i> System Health</a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- 1. ENROLLMENT FORM MODAL -->
+    <div id="enrollment-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> Sport Enrollment Registration</h3>
+                <button class="close-btn" onclick="closeModal('enrollment-modal')">&times;</button>
+            </div>
+            
+            <div class="sport-summary-badge" id="modal-sport-summary">
+                <!-- Summary of selected sport -->
+            </div>
+
+            <form id="enrollment-form" onsubmit="handleEnrollmentSubmit(event)">
+                <input type="hidden" id="enroll-sport-id">
+
+                <div class="form-section-title"><i class="fa-solid fa-child-reaching"></i> Participant Information</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Participant Full Name <span class="required">*</span></label>
+                        <input type="text" id="participant-name" required placeholder="e.g. Sammy Taylor">
+                    </div>
+                    <div class="form-group">
+                        <label>Participant Age <span class="required">*</span></label>
+                        <input type="number" id="participant-age" required min="3" max="25" placeholder="e.g. 10">
+                        <small class="field-hint" id="age-hint">Must match sport age restrictions.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>School Grade / Class</label>
+                        <input type="text" id="participant-grade" placeholder="e.g. 5th Grade">
+                    </div>
+                    <div class="form-group">
+                        <label>Camp T-Shirt Size <span class="required">*</span></label>
+                        <select id="tshirt-size" required>
+                            <option value="YS">Youth Small (YS)</option>
+                            <option value="YM">Youth Medium (YM)</option>
+                            <option value="YL">Youth Large (YL)</option>
+                            <option value="S">Adult Small (S)</option>
+                            <option value="M" selected>Adult Medium (M)</option>
+                            <option value="L">Adult Large (L)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Medical / Dietary / Special Notes</label>
+                    <textarea id="medical-notes" rows="2" placeholder="Mention any allergies, asthma, dietary needs, or physical accommodations..."></textarea>
+                </div>
+
+                <div class="form-section-title"><i class="fa-solid fa-user-shield"></i> Parent / Guardian Contact</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Parent / Guardian Full Name <span class="required">*</span></label>
+                        <input type="text" id="parent-name" required placeholder="e.g. Sarah Taylor">
+                    </div>
+                    <div class="form-group">
+                        <label>Parent Email Address <span class="required">*</span></label>
+                        <input type="email" id="parent-email" required placeholder="e.g. sarah.taylor@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Primary Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="parent-phone" required placeholder="e.g. +1-555-0192">
+                    </div>
+                    <div class="form-group">
+                        <label>Emergency Contact (Name & Relationship) <span class="required">*</span></label>
+                        <input type="text" id="emergency-contact" required placeholder="e.g. +1-555-9988 (Grandmother)">
+                    </div>
+                </div>
+
+                <div class="form-section-title"><i class="fa-solid fa-credit-card"></i> Payment Selection</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Payment Plan Option</label>
+                        <select id="payment-method">
+                            <option value="Full Payment">Full Payment Online (Credit Card / UPI / Debit)</option>
+                            <option value="2-Installments Plan">50% Deposit + 50% Camp Day 1</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Error feedback banner -->
+                <div id="form-error-alert" class="alert-box danger hidden"></div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('enrollment-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-submit-enrollment">
+                        <i class="fa-solid fa-check"></i> Complete & Confirm Enrollment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- 2. DIGITAL ENROLLMENT RECEIPT PASS MODAL -->
+    <div id="receipt-modal" class="modal">
+        <div class="modal-content modal-receipt">
+            <div class="modal-header no-print">
+                <h3><i class="fa-solid fa-circle-check text-success"></i> Enrollment Confirmation Pass</h3>
+                <button class="close-btn" onclick="closeModal('receipt-modal')">&times;</button>
+            </div>
+
+            <div id="receipt-card-content" class="receipt-card">
+                <!-- Loaded dynamically -->
+            </div>
+
+            <div class="modal-footer no-print">
+                <button class="btn btn-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+                <button class="btn btn-primary" onclick="closeModal('receipt-modal')">Done</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 3. ADD / EDIT SPORT MODAL (ADMIN) -->
+    <div id="sport-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="sport-modal-title"><i class="fa-solid fa-plus-circle"></i> Add Summer Camp Sport</h3>
+                <button class="close-btn" onclick="closeModal('sport-modal')">&times;</button>
+            </div>
+
+            <form id="sport-form" onsubmit="handleSportSubmit(event)">
+                <input type="hidden" id="admin-sport-id">
+
+                <div class="form-grid">
+                    <div class="form-group span-2">
+                        <label>Sport Title <span class="required">*</span></label>
+                        <input type="text" id="admin-sport-title" required placeholder="e.g. Junior Archery Masterclass">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Category <span class="required">*</span></label>
+                        <select id="admin-sport-category" required>
+                            <option value="Team Sports">Team Sports</option>
+                            <option value="Water Sports">Water Sports</option>
+                            <option value="Racket Sports">Racket Sports</option>
+                            <option value="Combat & Fitness">Combat & Fitness</option>
+                            <option value="Outdoor & Track">Outdoor & Track</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Icon Emoji <span class="required">*</span></label>
+                        <input type="text" id="admin-sport-icon" required value="⚽">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Min Allowed Age <span class="required">*</span></label>
+                        <input type="number" id="admin-sport-min-age" required min="3" max="25" value="6">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Max Allowed Age <span class="required">*</span></label>
+                        <input type="number" id="admin-sport-max-age" required min="3" max="25" value="14">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Head Instructor / Coach <span class="required">*</span></label>
+                        <input type="text" id="admin-sport-instructor" required placeholder="e.g. Coach Serena Williams">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Registration Fee ($) <span class="required">*</span></label>
+                        <input type="number" id="admin-sport-fee" required step="0.01" min="0" placeholder="150.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Max Capacity (Participants) <span class="required">*</span></label>
+                        <input type="number" id="admin-sport-capacity" required min="1" max="500" value="20">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Schedule Days <span class="required">*</span></label>
+                        <input type="text" id="admin-sport-schedule-days" required placeholder="e.g. Mon, Wed, Fri">
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label>Schedule Time <span class="required">*</span></label>
+                        <input type="text" id="admin-sport-schedule-time" required placeholder="e.g. 09:00 AM - 11:00 AM">
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label>Facility Location <span class="required">*</span></label>
+                        <input type="text" id="admin-sport-location" required placeholder="e.g. Main Field Pitch 2">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Activity Description <span class="required">*</span></label>
+                    <textarea id="admin-sport-description" rows="3" required placeholder="Detailed activity description..."></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('sport-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-floppy-disk"></i> Save Sport Activity</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- JS Files -->
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/admin.js"></script>
+</body>
+</html>
