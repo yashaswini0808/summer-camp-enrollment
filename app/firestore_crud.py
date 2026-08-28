@@ -184,14 +184,17 @@ def update_sport(sport_id: Union[int, str], sport_data: SportUpdate) -> Dict[str
             detail=f"Sport with ID {sport_id} not found."
         )
 
-    doc_slug_id = existing.get("slug_id") or slugify(existing["title"])
-    update_dict = sport_data.model_dump(exclude_unset=True)
+    # Lock fixed document ID before updating title or fields
+    target_doc_id = existing.get("slug_id") or slugify(existing["title"])
+    existing["slug_id"] = target_doc_id
 
+    update_dict = sport_data.model_dump(exclude_unset=True)
     for k, v in update_dict.items():
         existing[k] = v
 
-    sync_to_firebase_cloud("sports", doc_slug_id, existing)
+    sync_to_firebase_cloud("sports", target_doc_id, existing)
     return existing
+
 
 def delete_sport(sport_id: Union[int, str]) -> bool:
     existing = get_sport_by_id(sport_id)
