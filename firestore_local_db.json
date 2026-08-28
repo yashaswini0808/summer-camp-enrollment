@@ -114,8 +114,8 @@
       "title": "Beach Volleyball League",
       "category": "Team Sports",
       "description": "Bump, set, spike! Learn beach volleyball strategies, serve control, and active outdoor fitness.",
-      "min_age": 11,
-      "max_age": 17,
+      "min_age": 10,
+      "max_age": 20,
       "instructor": "Coach Spike Johnson",
       "schedule_days": "Tue, Fri",
       "schedule_time": "03:30 PM - 05:30 PM",
@@ -126,7 +126,8 @@
       "is_active": true,
       "id": 8,
       "enrolled_count": 0,
-      "created_at": "2026-08-26T11:29:03.423708"
+      "created_at": "2026-08-26T11:29:03.423708",
+      "slug_id": "8"
     },
     "summer-hoops-basketball-academy-2026": {
       "title": "Summer Hoops Basketball Academy 2026",
