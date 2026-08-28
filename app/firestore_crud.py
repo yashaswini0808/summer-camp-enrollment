@@ -45,20 +45,32 @@ def sync_to_firebase_cloud(collection_name: str, doc_id: str, payload: dict):
             "Content-Type": "application/json"
         }
 
-        def py_val_to_firestore_val(val):
-            if isinstance(val, bool): return {"booleanValue": val}
-            elif isinstance(val, int): return {"integerValue": str(val)}
-            elif isinstance(val, float): return {"doubleValue": val}
-            elif isinstance(val, str): return {"stringValue": val}
+        def py_val_to_firestore_val(key_name, val):
+            if val is None:
+                return {"stringValue": "None"}
+            elif isinstance(val, bool):
+                return {"stringValue": "Active" if val else "Inactive"}
+            elif isinstance(val, (int, float)):
+                if "fee" in key_name or "amount" in key_name or "revenue" in key_name:
+                    return {"stringValue": f"${float(val):.2f}"}
+                elif "age" in key_name:
+                    return {"stringValue": f"{val} years old"}
+                elif "capacity" in key_name:
+                    return {"stringValue": f"{val} max capacity"}
+                elif "count" in key_name or "enrolled" in key_name:
+                    return {"stringValue": f"{val} enrolled"}
+                elif "id" == key_name:
+                    return {"stringValue": f"ID #{val}"}
+                return {"stringValue": str(val)}
             elif isinstance(val, dict):
-                fields = {k: py_val_to_firestore_val(v) for k, v in val.items() if v is not None}
+                fields = {k: py_val_to_firestore_val(k, v) for k, v in val.items() if v is not None}
                 return {"mapValue": {"fields": fields}}
             elif isinstance(val, list):
-                return {"arrayValue": {"values": [py_val_to_firestore_val(item) for item in val]}}
-            elif val is None: return {"nullValue": None}
+                return {"arrayValue": {"values": [py_val_to_firestore_val(key_name, item) for item in val]}}
             return {"stringValue": str(val)}
 
-        fields = {k: py_val_to_firestore_val(v) for k, v in payload.items() if v is not None}
+        fields = {k: py_val_to_firestore_val(k, v) for k, v in payload.items() if v is not None}
+
         url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/default/documents/{collection_name}/{doc_id}"
         res = requests.patch(url, headers=headers, json={"fields": fields})
         if res.status_code == 200:

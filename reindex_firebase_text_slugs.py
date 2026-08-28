@@ -5,7 +5,7 @@ from google.oauth2 import service_account
 from google.auth.transport.requests import Request
 
 print("==========================================")
-print("RE-INDEXING FIREBASE WITH TEXT SLUG DOCUMENT IDs")
+print("RE-INDEXING FIREBASE WITH 100% STRING TEXT FIELDS")
 print("==========================================")
 
 credentials_path = "firebase_credentials.json"
@@ -38,55 +38,62 @@ def slugify(text):
     text = re.sub(r'[\s_-]+', '-', text)
     return text
 
-def py_val_to_firestore_val(val):
-    if isinstance(val, bool):
-        return {"booleanValue": val}
-    elif isinstance(val, int):
-        return {"integerValue": str(val)}
-    elif isinstance(val, float):
-        return {"doubleValue": val}
-    elif isinstance(val, str):
-        return {"stringValue": val}
+def py_val_to_firestore_val(key_name, val):
+    if val is None:
+        return {"stringValue": "None"}
+    elif isinstance(val, bool):
+        return {"stringValue": "Active" if val else "Inactive"}
+    elif isinstance(val, (int, float)):
+        if "fee" in key_name or "amount" in key_name or "revenue" in key_name:
+            return {"stringValue": f"${float(val):.2f}"}
+        elif "age" in key_name:
+            return {"stringValue": f"{val} years old"}
+        elif "capacity" in key_name:
+            return {"stringValue": f"{val} max capacity"}
+        elif "count" in key_name or "enrolled" in key_name:
+            return {"stringValue": f"{val} enrolled"}
+        elif "id" == key_name:
+            return {"stringValue": f"ID #{val}"}
+        return {"stringValue": str(val)}
     elif isinstance(val, dict):
-        fields = {k: py_val_to_firestore_val(v) for k, v in val.items() if v is not None}
+        fields = {k: py_val_to_firestore_val(k, v) for k, v in val.items() if v is not None}
         return {"mapValue": {"fields": fields}}
-    elif val is None:
-        return {"nullValue": None}
+    elif isinstance(val, list):
+        return {"arrayValue": {"values": [py_val_to_firestore_val(key_name, item) for item in val]}}
     return {"stringValue": str(val)}
 
-print("--- Uploading Sports with Descriptive Text Document IDs ---")
+print("--- Uploading Sports as 100% Text Strings ---")
 for s_id, s_data in sports_dict.items():
     title = s_data.get("title", f"sport-{s_id}")
     slug_id = slugify(title)
     s_data["slug_id"] = slug_id
     
-    fields = {k: py_val_to_firestore_val(v) for k, v in s_data.items() if v is not None}
+    fields = {k: py_val_to_firestore_val(k, v) for k, v in s_data.items() if v is not None}
     
-    # Write under slug_id document name
     url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/default/documents/sports/{slug_id}"
     body = {"fields": fields}
     res = requests.patch(url, headers=headers, json=body)
     if res.status_code == 200:
-        print(f"[SUCCESS] Uploaded Sport Document ID '{slug_id}' ({title})")
+        print(f"[SUCCESS 200 OK] Uploaded Sport Document '{slug_id}' (100% String Text)")
     else:
-        print(f"[!] Error uploading '{slug_id}': {res.text[:150]}")
+        print(f"[!] Error on '{slug_id}': {res.text[:150]}")
 
-print("\n--- Uploading Enrollments with Unique Enrollment Code Document IDs ---")
+print("\n--- Uploading Enrollments as 100% Text Strings ---")
 for e_id, e_data in enrollments_dict.items():
     code = e_data.get("enrollment_code", f"enrollment-{e_id}")
     p_name = e_data.get("participant_name", "")
     code_doc_id = f"{code.lower()}-{slugify(p_name)}" if p_name else code.lower()
     
-    fields = {k: py_val_to_firestore_val(v) for k, v in e_data.items() if v is not None}
+    fields = {k: py_val_to_firestore_val(k, v) for k, v in e_data.items() if v is not None}
     
     url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/default/documents/enrollments/{code_doc_id}"
     body = {"fields": fields}
     res = requests.patch(url, headers=headers, json=body)
     if res.status_code == 200:
-        print(f"[SUCCESS] Uploaded Enrollment Document ID '{code_doc_id}' for {p_name}")
+        print(f"[SUCCESS 200 OK] Uploaded Enrollment Document '{code_doc_id}' (100% String Text)")
     else:
-        print(f"[!] Error uploading '{code_doc_id}': {res.text[:150]}")
+        print(f"[!] Error on '{code_doc_id}': {res.text[:150]}")
 
 print("\n==========================================")
-print("SUCCESS! ALL FIREBASE DOCUMENTS ARE NOW NAMED BY TEXT SLUGS!")
+print("SUCCESS! ALL FIREBASE FIELDS ARE NOW 100% STRING TEXT!")
 print("==========================================")

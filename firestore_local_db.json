@@ -33,16 +33,17 @@
       "image_icon": "\ud83c\udfc0",
       "is_active": true,
       "id": 2,
-      "enrolled_count": 1,
-      "created_at": "2026-08-26T11:29:03.418570"
+      "enrolled_count": 2,
+      "created_at": "2026-08-26T11:29:03.418570",
+      "slug_id": "2"
     },
     "3": {
-      "title": "AquaSplash Swimming & Water Safety",
+      "title": "AquaSplash Swimming ",
       "category": "Water Sports",
       "description": "Learn stroke refinement, breathing techniques, diving basics, and water survival skills safely.",
       "min_age": 5,
       "max_age": 14,
-      "instructor": "Coach Elena Rostova",
+      "instructor": "chandan",
       "schedule_days": "Mon, Tue, Wed, Thu",
       "schedule_time": "08:30 AM - 10:00 AM",
       "location": "Olympic Heated Pool",
@@ -52,7 +53,8 @@
       "is_active": true,
       "id": 3,
       "enrolled_count": 2,
-      "created_at": "2026-08-26T11:29:03.420028"
+      "created_at": "2026-08-26T11:29:03.420028",
+      "slug_id": "3"
     },
     "4": {
       "title": "Elite Tennis Stars Camp",
@@ -342,6 +344,43 @@
         "id": 2,
         "enrolled_count": 1,
         "created_at": "2026-08-26T11:29:03.418570"
+      }
+    },
+    "camp-2026-g273d-rohan-gupta": {
+      "id": 6,
+      "enrollment_code": "CAMP-2026-G273D",
+      "sport_id": 2,
+      "participant_name": "Rohan Gupta",
+      "participant_age": 11,
+      "participant_grade": null,
+      "tshirt_size": "M",
+      "medical_notes": null,
+      "parent_name": "Anil Gupta",
+      "parent_email": "anil.gupta@example.com",
+      "parent_phone": "+919876500000",
+      "emergency_contact": "N/A",
+      "payment_method": "Full Payment",
+      "amount_paid": 175.0,
+      "status": "CONFIRMED",
+      "enrolled_at": "2026-08-28T04:26:18.953463",
+      "sport": {
+        "title": "Summer Hoops Basketball Academy",
+        "category": "Team Sports",
+        "description": "Master shooting drills, defense, fast breaks, and teamwork on indoor maple courts with pro coaches.",
+        "min_age": 8,
+        "max_age": 18,
+        "instructor": "Coach Marcus Vance",
+        "schedule_days": "Tue, Thu, Sat",
+        "schedule_time": "10:00 AM - 12:00 PM",
+        "location": "Indoor Arena Court 1",
+        "fee": 175.0,
+        "max_capacity": 7,
+        "image_icon": "\ud83c\udfc0",
+        "is_active": true,
+        "id": 2,
+        "enrolled_count": 1,
+        "created_at": "2026-08-26T11:29:03.418570",
+        "slug_id": "2"
       }
     }
   }
