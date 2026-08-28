@@ -147,34 +147,27 @@ def get_sports(
 
 def get_sport_by_id(sport_id: Union[int, str]) -> Optional[Dict[str, Any]]:
     sports = get_sports(active_only=False)
-    str_id = str(sport_id)
+    str_id = str(sport_id).strip().lower()
     for s in sports:
-        if str(s.get("id")) == str_id:
+        s_id = str(s.get("id", "")).strip().lower()
+        s_slug = str(s.get("slug_id", "")).strip().lower()
+        if s_id == str_id or s_slug == str_id:
             return s
     return None
 
-def create_sport(sport_data: SportCreate) -> Dict[str, Any]:
-    all_sports = get_sports(active_only=False)
-    max_id = 0
-    for s in all_sports:
-        try:
-            val = int(s["id"])
-            if val > max_id:
-                max_id = val
-        except ValueError:
-            pass
 
-    new_id = max_id + 1
+def create_sport(sport_data: SportCreate) -> Dict[str, Any]:
     doc_slug_id = slugify(sport_data.title)
 
     data = sport_data.model_dump()
-    data["id"] = new_id
+    data["id"] = doc_slug_id
     data["slug_id"] = doc_slug_id
     data["enrolled_count"] = 0
     data["created_at"] = datetime.utcnow().isoformat()
 
     sync_to_firebase_cloud("sports", doc_slug_id, data)
     return data
+
 
 def delete_firebase_cloud_doc(collection_name: str, doc_id: str):
     """Deletes an old document ID from Google Cloud Firebase Console"""
@@ -211,21 +204,18 @@ def update_sport(sport_id: Union[int, str], sport_data: SportUpdate) -> Dict[str
             detail=f"Sport with ID {sport_id} not found."
         )
 
-    old_doc_id = existing.get("slug_id") or slugify(existing["title"])
-    update_dict = sport_data.model_dump(exclude_unset=True)
+    # Lock fixed document ID in Firebase Console so updates modify the exact same document
+    fixed_doc_id = existing.get("slug_id") or slugify(existing["title"])
+    existing["slug_id"] = fixed_doc_id
 
+    update_dict = sport_data.model_dump(exclude_unset=True)
     for k, v in update_dict.items():
         existing[k] = v
 
-    new_doc_id = slugify(existing["title"])
-    existing["slug_id"] = new_doc_id
-
-    # If the title was renamed, remove the old document from Firebase Console
-    if old_doc_id != new_doc_id:
-        delete_firebase_cloud_doc("sports", old_doc_id)
-
-    sync_to_firebase_cloud("sports", new_doc_id, existing)
+    # Overwrite the exact same document in Firebase Cloud
+    sync_to_firebase_cloud("sports", fixed_doc_id, existing)
     return existing
+
 
 
 
