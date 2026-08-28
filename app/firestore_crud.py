@@ -93,13 +93,17 @@ def get_sports(
 
         for doc in docs:
             data = doc.to_dict()
-            data["id"] = doc.id if not data.get("id") else data["id"]
+            if not data.get("id"):
+                data["id"] = doc.id
+            if not data.get("slug_id"):
+                data["slug_id"] = doc.id
             
             if str(data["id"]).isdigit():
                 data["id"] = int(data["id"])
 
             if active_only and not data.get("is_active", True):
                 continue
+
 
             if category and category != "All" and data.get("category") != category:
                 continue
