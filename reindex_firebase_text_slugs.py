@@ -5,7 +5,7 @@ from google.oauth2 import service_account
 from google.auth.transport.requests import Request
 
 print("==========================================")
-print("RE-INDEXING FIREBASE WITH 100% STRING TEXT FIELDS")
+print("RE-INDEXING FIREBASE WITH NATIVE TYPED FIELDS (NUMBERS & CHARACTERS)")
 print("==========================================")
 
 credentials_path = "firebase_credentials.json"
@@ -40,21 +40,15 @@ def slugify(text):
 
 def py_val_to_firestore_val(key_name, val):
     if val is None:
-        return {"stringValue": "None"}
+        return {"nullValue": None}
     elif isinstance(val, bool):
-        return {"stringValue": "Active" if val else "Inactive"}
-    elif isinstance(val, (int, float)):
-        if "fee" in key_name or "amount" in key_name or "revenue" in key_name:
-            return {"stringValue": f"${float(val):.2f}"}
-        elif "age" in key_name:
-            return {"stringValue": f"{val} years old"}
-        elif "capacity" in key_name:
-            return {"stringValue": f"{val} max capacity"}
-        elif "count" in key_name or "enrolled" in key_name:
-            return {"stringValue": f"{val} enrolled"}
-        elif "id" == key_name:
-            return {"stringValue": f"ID #{val}"}
-        return {"stringValue": str(val)}
+        return {"booleanValue": val}
+    elif isinstance(val, int):
+        return {"integerValue": str(val)}
+    elif isinstance(val, float):
+        return {"doubleValue": val}
+    elif isinstance(val, str):
+        return {"stringValue": val}
     elif isinstance(val, dict):
         fields = {k: py_val_to_firestore_val(k, v) for k, v in val.items() if v is not None}
         return {"mapValue": {"fields": fields}}
@@ -62,7 +56,7 @@ def py_val_to_firestore_val(key_name, val):
         return {"arrayValue": {"values": [py_val_to_firestore_val(key_name, item) for item in val]}}
     return {"stringValue": str(val)}
 
-print("--- Uploading Sports as 100% Text Strings ---")
+print("--- Uploading Sports as Native Typed Fields (Numbers + Strings + Booleans) ---")
 for s_id, s_data in sports_dict.items():
     title = s_data.get("title", f"sport-{s_id}")
     slug_id = slugify(title)
@@ -74,11 +68,11 @@ for s_id, s_data in sports_dict.items():
     body = {"fields": fields}
     res = requests.patch(url, headers=headers, json=body)
     if res.status_code == 200:
-        print(f"[SUCCESS 200 OK] Uploaded Sport Document '{slug_id}' (100% String Text)")
+        print(f"[SUCCESS 200 OK] Uploaded Sport Document '{slug_id}' (Native Types)")
     else:
         print(f"[!] Error on '{slug_id}': {res.text[:150]}")
 
-print("\n--- Uploading Enrollments as 100% Text Strings ---")
+print("\n--- Uploading Enrollments as Native Typed Fields ---")
 for e_id, e_data in enrollments_dict.items():
     code = e_data.get("enrollment_code", f"enrollment-{e_id}")
     p_name = e_data.get("participant_name", "")
@@ -90,10 +84,10 @@ for e_id, e_data in enrollments_dict.items():
     body = {"fields": fields}
     res = requests.patch(url, headers=headers, json=body)
     if res.status_code == 200:
-        print(f"[SUCCESS 200 OK] Uploaded Enrollment Document '{code_doc_id}' (100% String Text)")
+        print(f"[SUCCESS 200 OK] Uploaded Enrollment Document '{code_doc_id}' (Native Types)")
     else:
         print(f"[!] Error on '{code_doc_id}': {res.text[:150]}")
 
 print("\n==========================================")
-print("SUCCESS! ALL FIREBASE FIELDS ARE NOW 100% STRING TEXT!")
+print("SUCCESS! FIREBASE FIELDS ARE NOW NATIVE MIXTURE OF NUMBERS & CHARACTERS!")
 print("==========================================")
