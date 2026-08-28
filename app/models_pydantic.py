@@ -66,8 +66,9 @@ class EnrollmentCreate(BaseModel):
     parent_name: str = Field(..., min_length=2, max_length=100, json_schema_extra={"example": "Sarah Taylor"})
     parent_email: str = Field(..., json_schema_extra={"example": "sarah.taylor@example.com"})
     parent_phone: str = Field(..., min_length=7, max_length=20, json_schema_extra={"example": "+1-555-0192"})
-    emergency_contact: str = Field(..., min_length=7, max_length=100, json_schema_extra={"example": "+1-555-9988 (Grandmother)"})
+    emergency_contact: Optional[str] = Field(default="N/A", json_schema_extra={"example": "+1-555-9988 (Grandmother)"})
     payment_method: str = Field(default="Full Payment", json_schema_extra={"example": "Full Payment"})
+
 
     @field_validator('parent_email')
     @classmethod
