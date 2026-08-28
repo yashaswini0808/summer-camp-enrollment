@@ -176,6 +176,33 @@ def create_sport(sport_data: SportCreate) -> Dict[str, Any]:
     sync_to_firebase_cloud("sports", doc_slug_id, data)
     return data
 
+def delete_firebase_cloud_doc(collection_name: str, doc_id: str):
+    """Deletes an old document ID from Google Cloud Firebase Console"""
+    try:
+        FirestoreLocalEmulator().collection(collection_name).document(doc_id).delete()
+    except Exception:
+        pass
+
+    try:
+        credentials_path = "firebase_credentials.json"
+        with open(credentials_path) as f:
+            key_info = json.load(f)
+
+        project_id = key_info["project_id"]
+        creds = service_account.Credentials.from_service_account_file(
+            credentials_path,
+            scopes=["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/datastore"]
+        )
+        creds.refresh(Request())
+        token = creds.token
+
+        headers = {"Authorization": f"Bearer {token}"}
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/default/documents/{collection_name}/{doc_id}"
+        requests.delete(url, headers=headers)
+        print(f"[FIREBASE DELETE SUCCESS] Deleted old document '{collection_name}/{doc_id}' from Google Cloud!")
+    except Exception as e:
+        print(f"[!] Delete document notice: {e}")
+
 def update_sport(sport_id: Union[int, str], sport_data: SportUpdate) -> Dict[str, Any]:
     existing = get_sport_by_id(sport_id)
     if not existing:
@@ -184,16 +211,22 @@ def update_sport(sport_id: Union[int, str], sport_data: SportUpdate) -> Dict[str
             detail=f"Sport with ID {sport_id} not found."
         )
 
-    # Lock fixed document ID before updating title or fields
-    target_doc_id = existing.get("slug_id") or slugify(existing["title"])
-    existing["slug_id"] = target_doc_id
-
+    old_doc_id = existing.get("slug_id") or slugify(existing["title"])
     update_dict = sport_data.model_dump(exclude_unset=True)
+
     for k, v in update_dict.items():
         existing[k] = v
 
-    sync_to_firebase_cloud("sports", target_doc_id, existing)
+    new_doc_id = slugify(existing["title"])
+    existing["slug_id"] = new_doc_id
+
+    # If the title was renamed, remove the old document from Firebase Console
+    if old_doc_id != new_doc_id:
+        delete_firebase_cloud_doc("sports", old_doc_id)
+
+    sync_to_firebase_cloud("sports", new_doc_id, existing)
     return existing
+
 
 
 def delete_sport(sport_id: Union[int, str]) -> bool:
