@@ -64,14 +64,15 @@ def sync_to_firebase_cloud(collection_name: str, doc_id: str, payload: dict):
             return {"stringValue": str(val)}
 
         fields = {k: py_val_to_firestore_val(k, v) for k, v in payload.items() if v is not None}
+        mask_params = "&".join([f"updateMask.fieldPaths={k}" for k in payload.keys() if payload[k] is not None])
 
-
-        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/default/documents/{collection_name}/{doc_id}"
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/default/documents/{collection_name}/{doc_id}?{mask_params}"
         res = requests.patch(url, headers=headers, json={"fields": fields})
         if res.status_code == 200:
             print(f"[FIREBASE SYNC SUCCESS] Live updated '{collection_name}/{doc_id}' in Google Cloud!")
         else:
             print(f"[!] Firebase Sync notice ({res.status_code}): {res.text[:150]}")
+
     except Exception as e:
         print(f"[WARNING] Live Firebase cloud sync notice: {e}")
 
