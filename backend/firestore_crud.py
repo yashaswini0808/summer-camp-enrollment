@@ -1,3 +1,4 @@
+import os
 import json
 import re
 import random
@@ -25,8 +26,9 @@ def sync_to_firebase_cloud(collection_name: str, doc_id: str, payload: dict):
     """
     try:
         credentials_path = "backend/firebase_credentials.json"
-        if not requests.os.path.exists(credentials_path):
+        if not os.path.exists(credentials_path):
             credentials_path = "firebase_credentials.json"
+
 
         with open(credentials_path) as f:
             key_info = json.load(f)
@@ -78,8 +80,9 @@ def delete_firebase_cloud_doc(collection_name: str, doc_id: str):
     """Deletes a document from Google Cloud Firebase Console."""
     try:
         credentials_path = "backend/firebase_credentials.json"
-        if not requests.os.path.exists(credentials_path):
+        if not os.path.exists(credentials_path):
             credentials_path = "firebase_credentials.json"
+
 
         with open(credentials_path) as f:
             key_info = json.load(f)
@@ -100,28 +103,76 @@ def delete_firebase_cloud_doc(collection_name: str, doc_id: str):
         print(f"[!] Delete document notice: {e}")
 
 
+def fetch_firestore_cloud_collection(collection_name: str) -> List[Dict[str, Any]]:
+    """Fetches real-time documents from Google Cloud Firestore REST API."""
+    try:
+        credentials_path = "backend/firebase_credentials.json"
+        if not os.path.exists(credentials_path):
+            credentials_path = "firebase_credentials.json"
+
+        with open(credentials_path) as f:
+            key_info = json.load(f)
+
+        project_id = key_info["project_id"]
+        creds = service_account.Credentials.from_service_account_file(
+            credentials_path,
+            scopes=["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/datastore"]
+        )
+        creds.refresh(Request())
+        token = creds.token
+
+        headers = {"Authorization": f"Bearer {token}"}
+        url = f"https://firestore.googleapis.com/v1/projects/{project_id}/databases/default/documents/{collection_name}"
+        res = requests.get(url, headers=headers)
+
+        if res.status_code == 200:
+            docs = res.json().get("documents", [])
+            results = []
+            for doc in docs:
+                doc_id = doc["name"].split("/")[-1]
+                fields = doc.get("fields", {})
+                
+                item = {"id": doc_id}
+                for k, v in fields.items():
+                    if "stringValue" in v:
+                        item[k] = v["stringValue"]
+                    elif "integerValue" in v:
+                        item[k] = int(v["integerValue"])
+                    elif "doubleValue" in v:
+                        item[k] = float(v["doubleValue"])
+                    elif "booleanValue" in v:
+                        item[k] = bool(v["booleanValue"])
+                    elif "nullValue" in v:
+                        item[k] = None
+                    elif "mapValue" in v:
+                        sub_fields = v["mapValue"].get("fields", {})
+                        sub_dict = {}
+                        for sk, sv in sub_fields.items():
+                            if "stringValue" in sv:
+                                sub_dict[sk] = sv["stringValue"]
+                            elif "integerValue" in sv:
+                                sub_dict[sk] = int(sv["integerValue"])
+                            elif "doubleValue" in sv:
+                                sub_dict[sk] = float(sv["doubleValue"])
+                            elif "booleanValue" in sv:
+                                sub_dict[sk] = bool(sv["booleanValue"])
+                        item[k] = sub_dict
+                results.append(item)
+            return results
+    except Exception as e:
+        print(f"[!] Cloud REST fetch notice ({collection_name}): {e}")
+    return []
+
+
 # ==========================================
 # 1. USER DATABASE OPERATIONS (Requirement #5)
 # ==========================================
 
 def get_users() -> List[Dict[str, Any]]:
     """Retrieves all users from Firestore database collection 'users'."""
-    db = get_db()
-    users = []
-    try:
-        if db:
-            docs = db.collection("users").stream()
-            for doc in docs:
-                data = doc.to_dict()
-                data["id"] = doc.id
-                users.append(data)
-        else:
-            # Fallback to REST API fetch if db client unavailable
-            pass
-    except Exception as e:
-        print("[WARNING] get_users query notice:", e)
+    users = fetch_firestore_cloud_collection("users")
 
-    # Return default seed users if empty for initial setup
+    # If Firestore returns empty, return default seed users for initial display
     if not users:
         users = [
             {"id": "user-savitri", "name": "Savitri", "email": "divyashreens11@gmail.com", "age": 35, "role": "Parent", "created_at": "2026-08-26T11:00:00Z"},
@@ -129,6 +180,7 @@ def get_users() -> List[Dict[str, Any]]:
             {"id": "user-admin", "name": "Admin Manager", "email": "admin@summercamp.org", "age": 40, "role": "Administrator", "created_at": "2026-01-01T00:00:00Z"}
         ]
     return users
+
 
 
 def get_user(user_id: str) -> Optional[Dict[str, Any]]:
@@ -203,25 +255,16 @@ def get_sports(
     search: Optional[str] = None,
     active_only: bool = True
 ) -> List[Dict[str, Any]]:
-    db = get_db()
-    sports = []
+    sports = fetch_firestore_cloud_collection("sports")
 
-    try:
-        if db:
-            docs = db.collection("sports").stream()
-            for doc in docs:
-                data = doc.to_dict()
-                data["id"] = data.get("slug_id") or doc.id
-                data["slug_id"] = data["id"]
-                if active_only and not data.get("is_active", True):
-                    continue
-                sports.append(data)
-    except Exception as e:
-        print("[WARNING] Sports stream query notice:", e)
+    for data in sports:
+        data["id"] = data.get("slug_id") or data["id"]
+        data["slug_id"] = data["id"]
 
     if not sports:
         from backend.seed import SAMPLE_SPORTS
         sports = SAMPLE_SPORTS
+
 
     # Apply filtering
     filtered = []
