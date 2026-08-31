@@ -21,11 +21,19 @@ export default function Navbar({ activeTab, setActiveTab }) {
           </button>
 
           <button
+            className={`nav-btn ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => setActiveTab('users')}
+          >
+            <i className="fa-solid fa-users"></i> Users Management
+          </button>
+
+          <button
             className={`nav-btn ${activeTab === 'enrollments' ? 'active' : ''}`}
             onClick={() => setActiveTab('enrollments')}
           >
             <i className="fa-solid fa-receipt"></i> My Enrollments
           </button>
+
 
           <button
             className={`nav-btn ${activeTab === 'reviews' ? 'active' : ''}`}

@@ -8,10 +8,11 @@ import ReceiptModal from './components/ReceiptModal';
 import ParentPortal from './components/ParentPortal';
 import AdminDashboard from './components/AdminDashboard';
 import ReviewsSection from './components/ReviewsSection';
+import UserManagement from './components/UserManagement';
 import './App.css';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog', 'enrollments', 'reviews', 'admin'
+  const [activeTab, setActiveTab] = useState('catalog'); // 'catalog', 'users', 'enrollments', 'reviews', 'admin'
   const [selectedSportForEnrollment, setSelectedSportForEnrollment] = useState(null);
   const [sportToEdit, setSportToEdit] = useState(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -71,11 +72,16 @@ export default function App() {
           </>
         )}
 
+        {activeTab === 'users' && (
+          <UserManagement />
+        )}
+
         {activeTab === 'reviews' && (
           <div className="py-8">
             <ReviewsSection />
           </div>
         )}
+
 
 
         {activeTab === 'enrollments' && (
